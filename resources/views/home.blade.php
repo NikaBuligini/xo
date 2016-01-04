@@ -39,11 +39,11 @@
                 </div>
             </div>
 
-            <div class="col-md-6">
+            <div class="col-md-6 result">
                 <h3 v-if="gameOver > 0">@{{ gameOver == 1 ? "You won" : "You Lose" }}</h3>
             </div>
 
-            <div class="col-md-6">
+            <div class="col-md-6 result">
                 <h3 v-if="gameOver > 0">@{{ gameOver == 2 ? "You won" : "You Lose" }}</h3>
             </div>
         </div>
@@ -52,8 +52,34 @@
 @endsection
 
 @section('scripts')
+<script src="https://cdn.socket.io/socket.io-1.3.7.js"></script>
 <script type="text/javascript">
     Vue.config.debug = true;
+
+    var socket = io('localhost:3000');
+
+    socket.on('welcome', function (data) {
+        console.log(data);
+        socket.emit('hello', { id: 1, name: 'Nikoloz Buligini' });
+    });
+
+    initializeBoard = function(board) {
+        board = [];
+
+        for (var i = 0; i < 3; i++) {
+            var row = [];
+
+            for (var j = 0; j < 3; j++) {
+                row.push({
+                    state: 0
+                });
+            }
+
+            board.push(row);
+        }
+
+        return board;
+    }
 
     checkItem = function(item, acumulator) {
         if (item.state == 1) {
@@ -75,30 +101,16 @@
         el: '#app',
 
         ready: function() {
-            self = this;
-
-            for (var i = 0; i < 3; i++) {
-                var row = [];
-
-                for (var j = 0; j < 3; j++) {
-                    row.push({
-                        state: 0
-                    });
-                }
-
-                self.board.push(row);
-            }
+            this.board = initializeBoard(this.board);
         },
 
         computed: {
             gameOver: function() {
                 var board = this.board;
 
-                if (board.length == 0) {
+                if (board == null) {
                     return -1;
                 }
-
-                // vlog(this.board);
 
                 // check row
                 for (var i = 0; i < 3; i++) {
@@ -151,21 +163,26 @@
                 }
 
                 return -1;
+            },
+
+            onReset: function() {
+                this.board = initializeBoard(this.board);
+                this.count = 0;
             }
         },
 
         data: {
-            board: [],
+            board: null,
             count: 0,
             turn: 1
         },
 
         methods: {
             onSelect: function(item, player, $event) {
-                if (self.turn == player && item.state == 0 && self.gameOver == -1) {
-                    self.turn = player == 1 ? 2 : 1;
+                if (this.turn == player && item.state == 0 && this.gameOver == -1) {
+                    this.turn = player == 1 ? 2 : 1;
                     item.state = player;
-                    self.count++;
+                    this.count++;
                 }
             }
         }

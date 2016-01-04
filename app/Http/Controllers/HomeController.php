@@ -6,6 +6,8 @@ use App\Http\Requests;
 use Illuminate\Http\Request;
 
 use Auth;
+use App\Board;
+use App\Player;
 
 class HomeController extends Controller
 {
@@ -26,8 +28,35 @@ class HomeController extends Controller
      */
     public function index()
     {
-        // dd(Auth::guest());
-
         return view('home');
+    }
+
+    public function createBoard()
+    {
+        $table = json_encode([
+            [['state' => 0], ['state' => 0], ['state' => 0]], 
+            [['state' => 0], ['state' => 0], ['state' => 0]], 
+            [['state' => 0], ['state' => 0], ['state' => 0]]
+        ]);
+
+        $board = Board::create([
+            'table' => $table,
+            'moves' => 0,
+            'finished' => false
+        ]);
+
+        $player1 = Player::create([
+            'user_id' => 1,
+            'board_id' => $board->id,
+            'winner' => null
+        ]);
+
+        $player2 = Player::create([
+            'user_id' => 1,
+            'board_id' => $board->id,
+            'winner' => null
+        ]);
+
+        return redirect('/');
     }
 }

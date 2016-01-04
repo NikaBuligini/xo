@@ -28,6 +28,7 @@
 
 Route::group(['middleware' => ['web']], function () {
     Route::get('/', 'HomeController@index');
+    Route::get('/createBoard', 'HomeController@createBoard');
 });
 
 Route::group(['middleware' => 'web'], function () {

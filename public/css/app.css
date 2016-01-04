@@ -28,3 +28,7 @@
 .xo > div > div:hover {
 	background-color: #ddd;
 }
+
+.result {
+	text-align: center;
+}
