@@ -12,8 +12,12 @@
                 </div>
             </div>
         </div> -->
+        <input type="hidden" id="user_id" value="{{ $user->id }}">
+        <input type="hidden" id="user_name" value="{{ $user->name }}">
 
         <div id="app">
+            <users></users>
+
             <div class="col-md-12">
                 <span>@{{ count }} | </span>
                 <span>@{{ gameOver }}</span>
@@ -39,6 +43,12 @@
                 </div>
             </div>
 
+            <ul>
+                <li v-for="user in users">
+                    <span>@{{ user.name }}</span>
+                </li>
+            </ul>
+
             <div class="col-md-6 result">
                 <h3 v-if="gameOver > 0">@{{ gameOver == 1 ? "You won" : "You Lose" }}</h3>
             </div>
@@ -49,6 +59,30 @@
         </div>
     </div>
 </div>
+
+<!-- Templates -->
+<div>
+    <template id="xo-board-template">
+        <div v-if="board" class="xo">
+            <div v-for="row in board">
+                <div v-for="item in row" v-on:click="onSelect(item, 2, $event)">
+                    <i :class="['fa', item.state == 1 ? 'fa-times' :  item.state == 2 ? 'fa-circle-o' : '']"></i>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="users-template">
+        <div class="col-md-12" style="height: 400px;">
+            <ul>
+                <li v-for="user in users">
+                    @{{ user.name }}
+                </li>
+            </ul>
+        </div>
+    </template>
+</div>
+<!-- End of Templates -->
 @endsection
 
 @section('scripts')
@@ -56,12 +90,42 @@
 <script type="text/javascript">
     Vue.config.debug = true;
 
-    var socket = io('localhost:3000');
+    var user_id = $('#user_id').val();
+    var user_name = $('#user_name').val();
 
-    socket.on('welcome', function (data) {
-        console.log(data);
-        socket.emit('hello', { id: 1, name: 'Nikoloz Buligini' });
+    var users_comp = Vue.extend({
+        template: '#users-template',
+        proprs: [],
+        ready: function() {
+            console.log('component started');
+
+            self = this;
+
+            socket.on('welcome', function (data) {
+                console.log(data);
+                self.users = data.users;
+                socket.emit('hello', { id: user_id, name: user_name });
+                socket.emit('get-users-list');
+            });
+
+            socket.on('users-list', function (users) {
+                console.log(users);
+                self.users = users;
+            });
+
+            setInterval(function() {
+                socket.emit('get-users-list');
+                console.log('request list');
+            }, 10000);
+        },
+        data: function() {
+            return {
+                users: []
+            };
+        }
     });
+
+    var socket = io('localhost:3000');
 
     initializeBoard = function(board) {
         board = [];
@@ -174,7 +238,12 @@
         data: {
             board: null,
             count: 0,
-            turn: 1
+            turn: 1,
+            users: []
+        },
+
+        components: {
+            'users': users_comp
         },
 
         methods: {

@@ -28,7 +28,9 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('home');
+        $user = Auth::user();
+
+        return view('home', compact('user'));
     }
 
     public function createBoard()
