@@ -16,7 +16,17 @@
         <input type="hidden" id="user_name" value="{{ $user->name }}">
 
         <div id="app">
-            <users></users>
+            <div class="col-md-8">
+                <div class="active_users_container md_card">
+                    <users user-id="{{ $user->id }}"></users>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="profile_container md_card">
+                    <profile user-status="{{ $user->status }}"></profile>
+                </div>
+            </div>
 
             <div class="col-md-12">
                 <span>@{{ count }} | </span>
@@ -73,12 +83,23 @@
     </template>
 
     <template id="users-template">
-        <div class="col-md-12" style="height: 400px;">
-            <ul>
-                <li v-for="user in users">
-                    @{{ user.name }}
-                </li>
-            </ul>
+        <ul v-if="users.length > 0" class="active_users_list">
+            <li v-for="user in users">
+                @{{ user.name }}
+            </li>
+        </ul>
+    </template>
+
+    <template id="profile-template">
+        <div class="line"><label for="name">Name:</label><span>{{ $user->name }}</span><i :class="['fa', 'fa-circle', 'user_status_icon', currStatus.cls]"></i></div>
+        <div class="line"><label for="rank">Rank:</label><span>Bronze</span></div>
+        <div class="line"><label for="matches">Matches:</label><span>0</span></div>
+        <div class="line"><label for="won">Won:</label><span>0</span></div>
+
+        <div class="line">
+            <select name="status" id="user_status" v-on:change="statusSelected">
+                <option v-for="status in statuses" :value="status.val">@{{ status.name }}</option>
+            </select>
         </div>
     </template>
 </div>
@@ -87,46 +108,9 @@
 
 @section('scripts')
 <script src="https://cdn.socket.io/socket.io-1.3.7.js"></script>
+<script src="{{ asset('/js/enums.js') }}"></script>
+<script src="{{ asset('/js/templates.js') }}"></script>
 <script type="text/javascript">
-    Vue.config.debug = true;
-
-    var user_id = $('#user_id').val();
-    var user_name = $('#user_name').val();
-
-    var users_comp = Vue.extend({
-        template: '#users-template',
-        proprs: [],
-        ready: function() {
-            console.log('component started');
-
-            self = this;
-
-            socket.on('welcome', function (data) {
-                console.log(data);
-                self.users = data.users;
-                socket.emit('hello', { id: user_id, name: user_name });
-                socket.emit('get-users-list');
-            });
-
-            socket.on('users-list', function (users) {
-                console.log(users);
-                self.users = users;
-            });
-
-            setInterval(function() {
-                socket.emit('get-users-list');
-                console.log('request list');
-            }, 10000);
-        },
-        data: function() {
-            return {
-                users: []
-            };
-        }
-    });
-
-    var socket = io('localhost:3000');
-
     initializeBoard = function(board) {
         board = [];
 
@@ -243,7 +227,8 @@
         },
 
         components: {
-            'users': users_comp
+            'users': users_comp,
+            'profile': profile_comp
         },
 
         methods: {

@@ -44,31 +44,38 @@ io.on('connection', function (socket) {
 	var curr = null;
 
 	socket.emit('welcome', { 
-		hello: 'send your name',
+		hello: 'hello!',
 		users: users
 	});
 
-	socket.on('hello', function (user) {
-		users.pushSafe(user, function(e) {
-			return e.id === user.id;
-		});
-		curr = user;
+	socket.on('get-users-list', function (user) {
+		// check if first call
+		if (typeof(user) != 'undefined') {
+			users.pushSafe(user, function(e) {
+				return e != null && e.id === user.id;
+			});
+			curr = user;
+			console.log('user connected', user);
+		}
 
-		console.log(user);
-	});
+		var result = users.reduce(function(acc, user) {
+            if (curr != null && user.id != curr.id) {
+                acc.push(user);
+            }
 
-	socket.on('get-users-list', function (data) {
-		socket.emit('users-list', users);
+            return acc;
+        }, []);
+
+		socket.emit('users-list', result);
 	});
 
 	socket.on('disconnect', function () {
 		console.log('user disconnected', curr);
 		for (var i = 0; i < users.length; i++) {
-			if (users[i].id == curr.id) {
+			if (curr != null && users[i].id == curr.id) {
 				users.splice(i, 1);
 				break;
 			}
 		}
-		console.log(users);
 	});
 });
