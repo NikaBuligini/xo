@@ -111,6 +111,12 @@
 <script src="{{ asset('/js/enums.js') }}"></script>
 <script src="{{ asset('/js/templates.js') }}"></script>
 <script type="text/javascript">
+    $.post('/xo/public/api/me', {}, function(data, textStatus, xhr) {
+        console.log(data);
+        console.log(textStatus);
+        console.log(xhr);
+    });
+
     initializeBoard = function(board) {
         board = [];
 

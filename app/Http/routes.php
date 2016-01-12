@@ -37,6 +37,7 @@ Route::group(['middleware' => 'web'], function () {
 
 Route::group(['prefix' => 'api', 'middleware' => ['web']], function() {
 	Route::group(['prefix' => 'me'], function() {
+		Route::post('/', 'UserController@getAuth');
 		Route::post('status/update', 'UserController@updateStatus');
 	});
 });

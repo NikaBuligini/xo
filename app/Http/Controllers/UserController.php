@@ -21,6 +21,10 @@ class UserController extends Controller
         $this->middleware('auth');
     }
 
+    public function getAuth() {
+        return Auth::user();
+    }
+
     public function updateStatus(Request $request) {
     	if ($request->status) {
     		$user = Auth::user();
