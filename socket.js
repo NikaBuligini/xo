@@ -43,39 +43,39 @@ var users = [];
 io.on('connection', function (socket) {
 	var curr = null;
 
-	socket.emit('welcome', { 
-		hello: 'hello!',
-		users: users
-	});
-
-	socket.on('get-users-list', function (user) {
-		// check if first call
+	socket.on('login', function (user) {
 		if (typeof(user) != 'undefined') {
-			users.pushSafe(user, function(e) {
-				return e != null && e.id === user.id;
-			});
+			users.pushSafe(user, function(e) { return e != null && e.id === user.id; });
 			curr = user;
+			socket.emit('users-list', get_active_users());
 			console.log('user connected', user);
 		}
-
-		var result = users.reduce(function(acc, user) {
-            if (curr != null && user.id != curr.id) {
-                acc.push(user);
-            }
-
-            return acc;
-        }, []);
-
-		socket.emit('users-list', result);
 	});
-
 	socket.on('disconnect', function () {
-		console.log('user disconnected', curr);
 		for (var i = 0; i < users.length; i++) {
 			if (curr != null && users[i].id == curr.id) {
 				users.splice(i, 1);
+				curr = null;
 				break;
 			}
 		}
 	});
+
+	var intervalID = setInterval(function() {
+		if (curr == null) { return clearInterval(intervalID); }
+
+		var result = users.reduce(function(acc, user) {
+      if (user.id != curr.id) { acc.push(user); }
+      return acc;
+    }, []);
+
+		socket.emit('users-list', get_active_users());
+	}, 5000);
+
+	function get_active_users() {
+		return users.reduce(function(acc, user) {
+      if (user.id != curr.id && user.status != 4) { acc.push(user); }
+      return acc;
+    }, []);
+	}
 });
