@@ -18,11 +18,23 @@ var users_comp = Vue.extend({
 
         socket.emit('login', { id: user_id, name: user_name, status: user_status });
         socket.on('users-list', function (users) { self.users = users; });
+        socket.on('xo-channel:request.'+user_id, function (data) {
+          $.post('/xo/public/api/match/get', {match_request_id: data.match_request_id}, function (data) {
+            console.log(data);
+          })
+        });
     },
     data: function() {
         return {
             users: []
         };
+    },
+    methods: {
+      sendRequest: function(user) {
+        $.post('/xo/public/api/match/request', {target_id: user.id}, function(data) {
+          console.log(data);
+        });
+      }
     }
 });
 

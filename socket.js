@@ -4,7 +4,7 @@ var io = require('socket.io')(http);
 var Redis = require('ioredis');
 var redis = new Redis();
 
-redis.subscribe('test-channel', function (err, count) {
+redis.subscribe('xo-channel', function (err, count) {
 	//
 });
 
@@ -12,10 +12,10 @@ redis.on('message', function (channel, message) {
 	console.log('Message Received!');
 
 	message = JSON.parse(message);
-	console.log(message);
-	//message.event
-	console.log(message.data.event);
-	io.emit(channel + ':' + message.data.event, message.data);
+
+	console.log(message.data.name);
+	console.log(message.data.content);
+	io.emit(channel + ':' + message.data.name, message.data.content);
 });
 
 http.listen(3000, function () {

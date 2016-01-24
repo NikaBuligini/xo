@@ -11,10 +11,6 @@
 |
 */
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
-
 /*
 |--------------------------------------------------------------------------
 | Application Routes
@@ -29,6 +25,7 @@
 Route::group(['middleware' => ['web']], function () {
     Route::get('/', 'HomeController@index');
     Route::get('/createBoard', 'HomeController@createBoard');
+    Route::get('/board/{board}', 'HomeController@board');
 });
 
 Route::group(['middleware' => 'web'], function () {
@@ -39,5 +36,11 @@ Route::group(['prefix' => 'api', 'middleware' => ['web']], function() {
 	Route::group(['prefix' => 'me'], function() {
 		Route::post('/', 'UserController@getAuth');
 		Route::post('status/update', 'UserController@updateStatus');
+		Route::get('match/request', 'UserController@sendMatchRequest');
+	});
+
+  Route::group(['prefix' => 'match'], function() {
+		Route::post('get', 'HomeController@getRequest');
+		Route::post('request', 'HomeController@sendMatchRequest');
 	});
 });
