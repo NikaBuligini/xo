@@ -1,4 +1,9 @@
-var elixir = require('laravel-elixir');
+'use strict';
+
+var gulp = require('gulp');
+var sass = require('gulp-sass');
+var concat = require('gulp-concat');
+// var elixir = require('laravel-elixir');
 
 /*
  |--------------------------------------------------------------------------
@@ -11,6 +16,17 @@ var elixir = require('laravel-elixir');
  |
  */
 
-elixir(function(mix) {
-    mix.sass('app.scss');
+gulp.task('sass', function () {
+  return gulp.src('./public/**/*.scss')
+    .pipe(concat('./css/all.css'))
+    .pipe(sass({outputStyle: 'compressed'}).on('error', sass.logError))
+    .pipe(gulp.dest('./public'));
 });
+
+gulp.task('sass:watch', function () {
+  gulp.watch('./public/**/*.scss', ['sass']);
+});
+
+// elixir(function(mix) {
+//     mix.sass('app.scss');
+// });
